@@ -1,0 +1,71 @@
+# Python-related
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.db
+*.sqlite3
+
+# Django-related
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+
+# Virtual environment
+venv/
+env/
+.env/
+
+# IDE/editor directories
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Pytest
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.tmp
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Migrations
+*/migrations/*
+!*/migrations/__init__.py
+
+# Pipenv
+Pipfile.lock
+
+# Django Secret Key
+secret_key.txt
+
+
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+eggs-info/
+pip-wheel-metadata/
+__pypackages__/
+*.egg-info/
+*.egg
+*.whl
