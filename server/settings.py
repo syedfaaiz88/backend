@@ -155,3 +155,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtppro.zoho.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'faizan.hussain@bigentities.com'
+EMAIL_HOST_PASSWORD = '#Trigonometry1'
+DEFAULT_FROM_EMAIL = 'faizan.hussain@bigentities.com'
+FRONTEND_URL = 'http://localhost:3000'
+TOKEN_EXPIRATION_DURATION = 2 #minutes

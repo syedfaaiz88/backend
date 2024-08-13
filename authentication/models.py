@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
+import uuid
+from django.conf import settings
 
 class Gender(models.Model):
     name = models.CharField(max_length=30, unique=True)
@@ -21,6 +23,7 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_verified', True)
 
         return self.create_user(email, password, **extra_fields)
 
@@ -36,6 +39,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(blank=False, null=False)
     gender = models.ForeignKey(Gender, on_delete=models.PROTECT, blank=False, null=False)
     bio = models.TextField(blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+    verification_token = models.UUIDField(blank=True, null=True, default=None)
+    token_expiration = models.DateTimeField(blank=True, null=True, default=None)
 
     # Important fields for Django's admin and authentication system
     is_active = models.BooleanField(default=True)
@@ -51,5 +57,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+    def generate_verification_token(self):
+        self.verification_token = uuid.uuid4()
+        expiration_duration = settings.TOKEN_EXPIRATION_DURATION
+        self.token_expiration = timezone.now() + timezone.timedelta(minutes=expiration_duration)
+        self.save()
+        return self.verification_token
+    
     def __str__(self):
         return self.username
