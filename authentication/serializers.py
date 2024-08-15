@@ -1,7 +1,7 @@
 from rest_framework import serializers
+from authentication.services.user_service import UserService
 from .models import User
 from django.utils import timezone
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
@@ -26,15 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            phone_number=validated_data.get('phone_number', ''),
-            address=validated_data.get('address', ''),
-            date_of_birth=validated_data.get('date_of_birth', None),
-            gender=validated_data.get('gender'),
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', '')
-        )
+        user = UserService.create_user(validated_data)
+        if not user:
+            raise serializers.ValidationError("Failed to create user.", "USER_CREATION_FAILED")
         return user
