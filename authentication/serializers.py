@@ -2,6 +2,7 @@ from rest_framework import serializers
 from authentication.services.user_service import UserService
 from .models import User
 from django.utils import timezone
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()

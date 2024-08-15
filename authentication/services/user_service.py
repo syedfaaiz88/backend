@@ -15,6 +15,7 @@ class UserService:
                 last_name=validated_data['last_name'],
                 date_of_birth=validated_data['date_of_birth'],
                 gender=validated_data['gender'],
+                bio=validated_data['bio'],
                 phone_number=validated_data['phone_number'],
                 address=validated_data['address']
             )
