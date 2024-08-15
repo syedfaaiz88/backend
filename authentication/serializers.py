@@ -6,7 +6,6 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -21,9 +20,9 @@ class UserSerializer(serializers.ModelSerializer):
             if len(password) < 8 or not any(char.isupper() for char in password) or not any(char in '!@#$%^&*()_+-=[]{}|;:,.<>?/' for char in password):
                 raise serializers.ValidationError(
                     {'password': 'Password must be at least 8 characters long, contain one uppercase letter and one special character.'})
-        if data['date_of_birth'] and data['date_of_birth'].year > timezone.now().year - 18:
+        if data['date_of_birth'] and data['date_of_birth'].year > timezone.now().year - 6:
             raise serializers.ValidationError(
-                {'dob': 'You must be at least 18 years old.'})
+                {'dob': 'You must be at least 6 years old.'})
         return data
 
     def create(self, validated_data):

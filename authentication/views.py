@@ -36,11 +36,10 @@ class SignupView(generics.CreateAPIView):
             # Handle validation errors with custom response
             return custom_response(
                 status=False,
-                message="Validation failed.",
+                message=serializer.errors,
                 error_code="VALIDATION_ERROR",
-                result=serializer.errors,
                 has_result=False,
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_200_OK
             )
         return self.perform_create(serializer)
 
@@ -54,11 +53,10 @@ class LoginView(generics.GenericAPIView):
             # Handle validation errors with custom response
             return custom_response(
                 status=False,
-                message="Validation failed.",
+                message=serializer.errors,
                 error_code="VALIDATION_ERROR",
-                result=serializer.errors,
                 has_result=False,
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_200_OK
             )
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
@@ -70,7 +68,7 @@ class LoginView(generics.GenericAPIView):
                 message="Invalid credentials.",
                 error_code="INVALID_CREDENTIALS",
                 has_result=False,
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_200_OK
             )
 
         if not user.is_verified:
@@ -106,7 +104,7 @@ class VerifyEmailView(generics.GenericAPIView):
                 message="Invalid token format.",
                 error_code="INVALID_TOKEN_FORMAT",
                 has_result=False,
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_200_OK
             )        
         try:
             user = User.objects.get(verification_token=token)
@@ -117,7 +115,7 @@ class VerifyEmailView(generics.GenericAPIView):
                     message="Token has expired.",
                     error_code="TOKEN_EXPIRED",
                     has_result=False,
-                    status_code=status.HTTP_400_BAD_REQUEST
+                    status_code=status.HTTP_200_OK
                 )
 
             # Verify the user
@@ -139,5 +137,5 @@ class VerifyEmailView(generics.GenericAPIView):
                 message="Invalid token.",
                 error_code="INVALID_TOKEN",
                 has_result=False,
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_200_OK
             )
