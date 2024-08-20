@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
                     {'password': 'Password must be at least 8 characters long, contain one uppercase letter and one special character.'})
         if data['date_of_birth'] and data['date_of_birth'].year > timezone.now().year - 6:
             raise serializers.ValidationError(
-                {'dob': 'You must be at least 6 years old.'})
+                {'date_of_birth': 'You must be at least 6 years old.'})
         return data
 
     def create(self, validated_data):

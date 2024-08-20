@@ -55,8 +55,9 @@ class SignupView(generics.CreateAPIView):
         if not serializer.is_valid():
             return custom_response(
                 status=False,
-                message=serializer.errors,
+                message="Validation errors.",
                 error_code="VALIDATION_ERROR",
+                errors=serializer.errors,
                 has_result=False,
                 status_code=status.HTTP_200_OK
             )
@@ -72,8 +73,9 @@ class LoginView(generics.GenericAPIView):
             # Handle validation errors with custom response
             return custom_response(
                 status=False,
-                message=serializer.errors,
+                message="Validation errors.",
                 error_code="VALIDATION_ERROR",
+                errors=serializer.errors,
                 has_result=False,
                 status_code=status.HTTP_200_OK
             )
