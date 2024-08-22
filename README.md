@@ -73,12 +73,8 @@
             "address": "123 Example St, City, Country"
         },
         "tokens": {
-            "AccessToken": "xxx",
-            "AccessTokenExpiry": "date",
-            "RefreshToken": {
-                "token": "xxx",
-                "expiry": "date"
-            }
+            "access": "xxx",
+            "refresh": "xxx"
         }
     },
     "hasResult": true
@@ -98,5 +94,31 @@
     "errorCode": null,
     "result": null,
     "hasResult": false
+}
+```
+
+### 4. Refresh Token
+
+**Endpoint:** `api/refresh/token`
+**Method:** POST
+
+**Request:**
+```json
+{
+    "refresh": "xxx"
+}
+```
+
+**Response:**
+```json
+{
+  "status": true,
+  "message": "Token refreshed successfully.",
+  "errorCode": "",
+  "errors": null,
+  "result": {
+    "access": "xxx"
+  },
+  "hasResult": true
 }
 ```

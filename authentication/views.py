@@ -10,6 +10,8 @@ from .models import User
 from .serializers import UserSerializer, LoginSerializer
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -156,4 +158,36 @@ class VerifyEmailView(generics.GenericAPIView):
                 error_code=str(e.detail[0].code),
                 has_result=False,
                 status_code=status.HTTP_200_OK
+            )
+        
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        try:
+            # Attempt to refresh the token
+            response = super().post(request, *args, **kwargs)
+            # If successful, return a custom response
+            return custom_response(
+                status=True,
+                message="Token refreshed successfully.",
+                result=response.data,
+                has_result=True,
+                status_code=status.HTTP_200_OK
+            )
+        except (InvalidToken, TokenError) as e:
+            # Handle token errors with a custom response
+            return custom_response(
+                status=False,
+                message="Token is invalid or expired.",
+                error_code="TOKEN_ERROR",
+                has_result=False,
+                status_code=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            # Handle unexpected errors with a custom response
+            return custom_response(
+                status=False,
+                message=f"An unexpected error occurred: {str(e)}",
+                error_code="UNKNOWN_ERROR",
+                has_result=False,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
