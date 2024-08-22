@@ -1,11 +1,13 @@
+from smtplib import SMTPException
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 
-from authentication.services.email_service import EmailService
+from services.auth_service import AuthService
+from services.email_service import EmailService
+from utils.custom_response import custom_response
+
 from .models import User
 from .serializers import UserSerializer, LoginSerializer
-from .services.auth_service import AuthService
-from .utils.custom_response import custom_response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
@@ -21,8 +23,18 @@ class SignupView(generics.CreateAPIView):
             user.set_password(password)
             user.save()
 
-            # Send verification email
-            EmailService.send_verification_email(user)
+            try:
+                EmailService.send_verification_email(user)
+            except SMTPException as e:
+                print(f"SMTPException: {str(e)}")
+                return custom_response(
+                    status=False,
+                    message="User created, but failed to send verification email. Please contact support.",
+                    error_code="EMAIL_ERROR",
+                    result=UserSerializer(user).data,
+                    has_result=True,
+                    status_code=status.HTTP_201_CREATED
+                )
 
             return custom_response(
                 status=True,
@@ -41,6 +53,7 @@ class SignupView(generics.CreateAPIView):
                 status_code=status.HTTP_200_OK
             )
         except Exception as e:
+            print(e)
             # Handle unexpected errors
             return custom_response(
                 status=False,
@@ -93,7 +106,18 @@ class LoginView(generics.GenericAPIView):
             )
 
         if not user.is_verified:
-            EmailService.send_verification_email(user)
+            try:
+                EmailService.send_verification_email(user)
+            except SMTPException as e:
+                print(f"SMTPException: {str(e)}")
+                return custom_response(
+                    status=False,
+                    message="User existed, but failed to send verification email. Please contact support.",
+                    error_code="EMAIL_ERROR",
+                    result=UserSerializer(user).data,
+                    has_result=True,
+                    status_code=status.HTTP_201_CREATED
+                )
             return custom_response(
                 status=True,
                 message=f"Verification email sent to {user.email}. Please verify your account.",

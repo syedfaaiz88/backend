@@ -1,8 +1,7 @@
 from django.db import models
+from common.models.base_model import BaseModel
 
-# Create your models here.
-
-class Gender(models.Model):
+class Gender(BaseModel):
     name = models.CharField(max_length=30, unique=True)
 
     def __str__(self):

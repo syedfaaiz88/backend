@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gender
+from common.models.models import Gender
 
 # Register your models here.
 
