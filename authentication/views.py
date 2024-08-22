@@ -1,17 +1,21 @@
-from smtplib import SMTPException
-from rest_framework import generics
-from rest_framework.permissions import AllowAny
-
 from services.auth_service import AuthService
 from services.email_service import EmailService
 from utils.custom_response import custom_response
-
 from .models import User
 from .serializers import UserSerializer, LoginSerializer
+
+from smtplib import SMTPException
+
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import AuthenticationFailed, ValidationError, APIException
+from rest_framework.views import exception_handler
+
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -191,3 +195,61 @@ class CustomTokenRefreshView(TokenRefreshView):
                 has_result=False,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.data.get("refresh")
+        print("Refresh token ", refresh_token)
+        if not refresh_token:
+            return custom_response(
+                status=False,
+                message="Refresh token is required.",
+                error_code="MISSING_TOKEN",
+                has_result=False,
+                status_code=status.HTTP_200_OK
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return custom_response(
+                status=True,
+                message="Logout successful.",
+                has_result=False,
+                status_code=status.HTTP_200_OK
+            )
+        except TokenError as e:
+            # TokenError is raised for invalid tokens (e.g., wrong token type, expired token)
+            return custom_response(
+                status=False,
+                message="Invalid token.",
+                error_code="INVALID_TOKEN",
+                errors=str(e),
+                has_result=False,
+                status_code=status.HTTP_200_OK
+            )
+        except Exception as e:
+            # Handle unexpected errors
+            return custom_response(
+                status=False,
+                message="An unexpected error occurred during logout.",
+                error_code="LOGOUT_ERROR",
+                errors=str(e),
+                has_result=False,
+                status_code=status.HTTP_200_OK
+            )
+
+    def handle_exception(self, exc):
+        # Handle exceptions with a custom response
+        if isinstance(exc, APIException):
+            return custom_response(
+                status=False,
+                message=exc.detail['detail'],
+                error_code=str(exc.default_code).upper(),
+                has_result=False,
+                status_code=status.HTTP_200_OK
+            )
+        return super().handle_exception(exc)
