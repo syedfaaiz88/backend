@@ -1,4 +1,4 @@
-"# API Documentation
+# API Documentation
 
 ## Endpoints
 
@@ -120,5 +120,29 @@
     "access": "xxx"
   },
   "hasResult": true
+}
+```
+
+### 4. Logout
+
+**Endpoint:** `api/logout/`
+**Method:** POST
+
+**Request:**
+```json
+{
+    "refresh": "xxx"
+}
+```
+
+**Response:**
+```json
+{
+  "status": true,
+  "message": "Logout successfully.",
+  "errorCode": "",
+  "errors": null,
+  "result": null,
+  "hasResult": false
 }
 ```
