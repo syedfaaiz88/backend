@@ -32,3 +32,22 @@ class UserSerializer(serializers.ModelSerializer):
         if not user:
             raise serializers.ValidationError("Failed to create user.", "USER_CREATION_FAILED")
         return user
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField()
+    again_new_password = serializers.CharField()
+
+    def validate_old_password(self, value):
+        validate_password_strength(value)
+        return value
+    
+    def validate_new_password(self, value):
+        validate_password_strength(value)
+        return value
+
+    def validate_again_new_password(self, value):
+        validate_password_strength(value)
+        return value
+
+

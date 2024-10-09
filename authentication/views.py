@@ -2,7 +2,7 @@ from services.auth_service import AuthService
 from services.email_service import EmailService
 from utils.api_responses import custom_response
 from .models import User
-from .serializers import UserSerializer, LoginSerializer
+from .serializers import ChangePasswordSerializer, UserSerializer, LoginSerializer
 
 from smtplib import SMTPException
 
@@ -10,6 +10,7 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -64,7 +65,7 @@ class SignupView(generics.CreateAPIView):
                 message=f"An unexpected error occurred: {str(e)}",
                 error_code="UNKNOWN_ERROR",
                 has_result=False,
-                status_code=status.HTTP_200_OK
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def post(self, request, *args, **kwargs):
@@ -83,6 +84,7 @@ class SignupView(generics.CreateAPIView):
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -143,6 +145,7 @@ class LoginView(generics.GenericAPIView):
 
 class VerifyEmailView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def get(self, request, token, *args, **kwargs):
         try:
@@ -163,6 +166,7 @@ class VerifyEmailView(generics.GenericAPIView):
             )
         
 class CustomTokenRefreshView(TokenRefreshView):
+    authentication_classes = []
     def post(self, request, *args, **kwargs):
         try:
             # Attempt to refresh the token
@@ -195,6 +199,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             )
 
 class LogoutView(generics.GenericAPIView):
+    authentication_classes = []
     
     def post(self, request, *args, **kwargs):
         refresh_token = request.data.get("refresh")
@@ -234,5 +239,75 @@ class LogoutView(generics.GenericAPIView):
                 error_code="LOGOUT_ERROR",
                 errors=str(e),
                 has_result=False,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class ChangePasswordView(generics.GenericAPIView):
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                # Handle validation errors with custom response
+                return custom_response(
+                    status=False,
+                    message="Validation errors.",
+                    error_code="VALIDATION_ERROR",
+                    errors=serializer.errors,
+                    has_result=False,
+                    status_code=status.HTTP_200_OK
+                )
+                
+            user = request.user
+            old_password = serializer.validated_data.get('old_password')
+            new_password = serializer.validated_data.get('new_password')
+            again_new_password = serializer.validated_data.get('again_new_password')
+
+            # Verify old password
+            if not user.check_password(old_password):
+                return custom_response(
+                    status=False,
+                    message="Old password is incorrect.",
+                    error_code="INVALID_OLD_PASSWORD",
+                    has_result=False,
+                    status_code=status.HTTP_200_OK
+                )
+
+            # Check if new passwords match
+            if new_password != again_new_password:
+                return custom_response(
+                    status=False,
+                    message="New passwords do not match.",
+                    error_code="PASSWORD_MISMATCH",
+                    has_result=False,
+                    status_code=status.HTTP_200_OK
+                )
+            if user.check_password(new_password):
+                return custom_response(
+                    status=False,
+                    message="Your old Password can't be your new password.",
+                    error_code="PASSWORD_MATCH_WITH_OLD",
+                    has_result=False,
+                    status_code=status.HTTP_200_OK
+                )
+            # Set the new password
+            user.set_password(new_password)
+            user.save()
+
+
+            return custom_response(
+                status=True,
+                message="Password changed successfully.",
+                has_result=False,
                 status_code=status.HTTP_200_OK
+            )      
+        except Exception as e:
+            return custom_response(
+                status=False,
+                message=f"An unexpected error occurred: {str(e)}",
+                error_code="UNKNOWN_ERROR",
+                has_result=False,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

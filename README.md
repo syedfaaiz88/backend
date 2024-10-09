@@ -146,3 +146,29 @@
   "hasResult": false
 }
 ```
+
+### 4. Change Password
+
+**Endpoint:** `api/change-password/`
+**Method:** POST
+
+**Request:**
+```json
+{
+    "new_password": "xxx",
+    "again_new_password": "xxx",
+    "old_password": "xxxx"
+}
+```
+
+**Response:**
+```json
+{
+    "status": true,
+    "message": "Password changed successfully.",
+    "errorCode": "",
+    "errors": null,
+    "result": null,
+    "hasResult": false
+}
+```
