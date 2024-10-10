@@ -49,5 +49,12 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate_again_new_password(self, value):
         validate_password_strength(value)
         return value
+    
+class EditProfileDetailsSerializer(serializers.Serializer):
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    user_name = serializers.CharField(required=False, allow_blank=True)
+    address = serializers.CharField(required=False, allow_blank=True)
+    bio = serializers.CharField(required=False, allow_blank=True)
 
 

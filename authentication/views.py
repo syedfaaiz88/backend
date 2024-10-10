@@ -2,7 +2,7 @@ from services.auth_service import AuthService
 from services.email_service import EmailService
 from utils.api_responses import custom_response
 from .models import User
-from .serializers import ChangePasswordSerializer, UserSerializer, LoginSerializer
+from .serializers import ChangePasswordSerializer, UserSerializer, LoginSerializer, EditProfileDetailsSerializer
 
 from smtplib import SMTPException
 
@@ -23,15 +23,19 @@ class SignupView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         try:
+            # Retrieve and process the email
+            email = self.request.data.get('email', '').strip().lower()
             password = self.request.data.get('password')
-            user = serializer.save()
+
+            # Pass processed email to the serializer for user creation
+            user = serializer.save(email=email)
             user.set_password(password)
             user.save()
 
+            # Attempt to send the verification email
             try:
                 EmailService.send_verification_email(user)
             except SMTPException as e:
-                print(f"SMTPException: {str(e)}")
                 return custom_response(
                     status=False,
                     message="User created, but failed to send verification email. Please contact support.",
@@ -58,7 +62,6 @@ class SignupView(generics.CreateAPIView):
                 status_code=status.HTTP_200_OK
             )
         except Exception as e:
-            print(e)
             # Handle unexpected errors
             return custom_response(
                 status=False,
@@ -99,6 +102,7 @@ class LoginView(generics.GenericAPIView):
                 status_code=status.HTTP_200_OK
             )
         email = serializer.validated_data.get('email')
+        email = email.strip().lower()
         password = serializer.validated_data.get('password')
 
         user = AuthService.authenticate_user(email=email, password=password)
@@ -115,7 +119,6 @@ class LoginView(generics.GenericAPIView):
             try:
                 EmailService.send_verification_email(user)
             except SMTPException as e:
-                print(f"SMTPException: {str(e)}")
                 return custom_response(
                     status=False,
                     message="User existed, but failed to send verification email. Please contact support.",
@@ -311,3 +314,57 @@ class ChangePasswordView(generics.GenericAPIView):
                 has_result=False,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class EditProfileDetailsView(generics.GenericAPIView):
+    serializer_class = EditProfileDetailsSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                # Handle validation errors with custom response
+                return custom_response(
+                    status=False,
+                    message="Validation errors.",
+                    error_code="VALIDATION_ERROR",
+                    errors=serializer.errors,
+                    has_result=False,
+                    status_code=status.HTTP_200_OK
+                )
+                
+            user = request.user
+
+            # Get validated data if available, otherwise use current user data
+            first_name = serializer.validated_data.get('first_name', user.first_name)
+            last_name = serializer.validated_data.get('last_name', user.last_name)
+            user_name = serializer.validated_data.get('user_name', user.username)
+            address = serializer.validated_data.get('address', user.address)
+            bio = serializer.validated_data.get('bio', user.bio)
+            # Update user fields
+            user.first_name = first_name
+            user.last_name = last_name
+            user.username = user_name
+            user.address = address
+            user.bio = bio
+            user.save()
+
+            # Return success response
+            return custom_response(
+                status=True,
+                message="Profile updated successfully.",
+                result=UserSerializer(user).data,
+                has_result=True,
+                status_code=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            # Handle unexpected errors
+            return custom_response(
+                status=False,
+                message=f"An unexpected error occurred: {str(e)}",
+                error_code="UNKNOWN_ERROR",
+                has_result=False,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+             
