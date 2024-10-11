@@ -12,7 +12,7 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'phone_number', 'address', 'date_of_birth', 'gender', 'bio', 'first_name', 'last_name', 'date_joined', 'is_verified']
+        fields = ['username', 'email', 'password', 'phone_number', 'address', 'date_of_birth', 'gender', 'bio', 'first_name', 'last_name', 'date_joined', 'is_verified', 'profile_picture']
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 8},
             'phone_number': {'min_length': 7},
@@ -57,4 +57,5 @@ class EditProfileDetailsSerializer(serializers.Serializer):
     address = serializers.CharField(required=False, allow_blank=True)
     bio = serializers.CharField(required=False, allow_blank=True)
 
-
+class EditProfilePictureSerializer(serializers.Serializer):
+    profile_picture = serializers.ImageField()

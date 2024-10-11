@@ -2,9 +2,11 @@ from services.auth_service import AuthService
 from services.email_service import EmailService
 from utils.api_responses import custom_response
 from .models import User
-from .serializers import ChangePasswordSerializer, UserSerializer, LoginSerializer, EditProfileDetailsSerializer
-
+from .serializers import ChangePasswordSerializer, UserSerializer, LoginSerializer, EditProfileDetailsSerializer, EditProfilePictureSerializer
+from utils.upload_profile_picture import upload_profile_picture
 from smtplib import SMTPException
+
+from django.conf import settings
 
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
@@ -396,4 +398,48 @@ class GetProfileDetailsView(generics.GenericAPIView):
                 error_code="UNKNOWN_ERROR",
                 has_result=False,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )      
+            )
+
+class EditProfilePictureView(generics.GenericAPIView):
+    serializer_class = EditProfilePictureSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                # Handle validation errors with custom response
+                return custom_response(
+                    status=False,
+                    message="Validation errors.",
+                    error_code="VALIDATION_ERROR",
+                    errors=serializer.errors,
+                    has_result=False,
+                    status_code=status.HTTP_200_OK
+                )
+                
+            user = request.user
+            profile_picture = serializer.validated_data.get('profile_picture')
+
+            # Use the outsourced function to upload the image and get the path
+            image_path = upload_profile_picture(user, profile_picture)
+            # Update the user's profile_picture field with the new image path
+            user.profile_picture = image_path
+            user.save()
+
+            # Return success response with updated user profile
+            return custom_response(
+                status=True,
+                message="Profile picture updated successfully.",
+                status_code=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            # Handle unexpected errors
+            return custom_response(
+                status=False,
+                message=f"An unexpected error occurred: {str(e)}",
+                error_code="UNKNOWN_ERROR",
+                has_result=False,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )                
