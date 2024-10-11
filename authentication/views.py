@@ -367,4 +367,33 @@ class EditProfileDetailsView(generics.GenericAPIView):
                 has_result=False,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-             
+
+class GetProfileDetailsView(generics.GenericAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Get the authenticated user
+            user = request.user
+
+            # Serialize the user data
+            serializer = self.get_serializer(user)
+
+            # Return the user profile details in a custom response
+            return custom_response(
+                status=True,
+                message="User profile details retrieved successfully.",
+                result=serializer.data,
+                has_result=True,
+                status_code=status.HTTP_200_OK
+            )
+        except Exception as e:
+            # Handle unexpected errors
+            return custom_response(
+                status=False,
+                message=f"An unexpected error occurred: {str(e)}",
+                error_code="UNKNOWN_ERROR",
+                has_result=False,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )      
