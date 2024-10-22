@@ -2,7 +2,7 @@ from services.auth_service import AuthService
 from services.email_service import EmailService
 from utils.api_responses import custom_response
 from .models import User
-from .serializers import ChangePasswordSerializer, UserSerializer, LoginSerializer, EditProfileDetailsSerializer, EditProfilePictureSerializer
+from .serializers import ChangePasswordSerializer, UserSerializer, LoginSerializer, EditProfileDetailsSerializer, EditProfilePictureSerializer, UserNameAvailablilitySerializer, DummySerializer
 from utils.upload_profile_picture import upload_profile_picture
 from smtplib import SMTPException
 
@@ -151,7 +151,7 @@ class LoginView(generics.GenericAPIView):
 class VerifyEmailView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     authentication_classes = []
-
+    serializer_class = DummySerializer
     def get(self, request, token, *args, **kwargs):
         try:
             user = EmailService.verify_email_token(token)
@@ -205,7 +205,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class LogoutView(generics.GenericAPIView):
     authentication_classes = []
-    
+    serializer_class = DummySerializer
     def post(self, request, *args, **kwargs):
         refresh_token = request.data.get("refresh")
         if not refresh_token:
@@ -442,4 +442,47 @@ class EditProfilePictureView(generics.GenericAPIView):
                 error_code="UNKNOWN_ERROR",
                 has_result=False,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )                
+            )
+
+class UserNameAvailablilityView(generics.GenericAPIView):
+    serializer_class = UserNameAvailablilitySerializer
+    authentication_classes = []
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                return custom_response(
+                    status=False,
+                    message="Validation errors.",
+                    error_code="VALIDATION_ERROR",
+                    errors=serializer.errors,
+                    has_result=False,
+                    status_code=status.HTTP_200_OK
+                )
+            
+            username = serializer.validated_data.get('username')
+
+            # Check if the username exists in the database
+            is_username_available = not User.objects.filter(username=username).exists()
+
+            # Return success response with username availability status
+            return custom_response(
+                status=True,
+                message="Username availability check completed.",
+                result={
+                    "user_name_availbility": is_username_available
+                },
+                has_result=True,
+                status_code=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            # Handle unexpected errors
+            return custom_response(
+                status=False,
+                message=f"An unexpected error occurred: {str(e)}",
+                error_code="UNKNOWN_ERROR",
+                has_result=False,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

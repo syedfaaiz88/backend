@@ -11,15 +11,15 @@
 
 ```json
 {
-  "username": "faaiz88",
-  "email": "faaiz290302@gmail.com",
-  "password": "#Trigonometry1",
-  "first_name": "Syed Faizan",
-  "last_name": "Hussain",
+  "username": "string",
+  "email": "user@example.com",
+  "password": "string",
+  "first_name": "string",
+  "last_name": "string",
   "date_of_birth": "1990-01-01",
   "gender": 1,
-  "phone_number": "1234567890",
-  "address": "123 Example St, City, Country"
+  "phone_number": "string",
+  "address": "string"
 }
 ```
 
@@ -31,14 +31,19 @@
   "message": "Verification email sent to faaiz290302@gmail.com. Please verify your account.",
   "errorCode": null,
   "result": {
-    "username": "faaiz88",
-    "email": "faaiz290302@gmail.com",
-    "first_name": "Syed Faizan",
-    "last_name": "Hussain",
-    "date_of_birth": "1990-01-01",
-    "gender": 1,
-    "phone_number": "1234567890",
-    "address": "123 Example St, City, Country"
+    "username": "string",
+    "email": "user@example.com",
+    "password": "string",
+    "phone_number": "strings",
+    "address": "string",
+    "date_of_birth": "2019-08-24",
+    "gender": 0,
+    "bio": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "date_joined": "2019-08-24T14:15:22Z",
+    "is_verified": true,
+    "profile_picture": "http://example.com"
   },
   "hasResult": true
 }
@@ -53,8 +58,8 @@
 
 ```json
 {
-  "email": "faaiz290302@gmail.com",
-  "password": "#Trigonometry1"
+  "email": "user@example.com",
+  "password": "string"
 }
 ```
 
@@ -67,17 +72,19 @@
   "errorCode": null,
   "result": {
     "user": {
-      "username": "sohaibfazal68",
-      "email": "bcsf19m010@pucit.edu.pk",
-      "phone_number": "03334461447",
-      "address": "Lahore",
-      "date_of_birth": "2001-10-25",
-      "gender": 1,
-      "bio": "SQA Engineer @ Bigentities",
-      "first_name": "Sohaib",
-      "last_name": "Fazal",
-      "date_joined": "2024-08-29T21:24:19.457513Z",
-      "is_verified": true
+      "username": "string",
+      "email": "user@example.com",
+      "password": "string",
+      "phone_number": "strings",
+      "address": "string",
+      "date_of_birth": "2019-08-24",
+      "gender": 0,
+      "bio": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "date_joined": "2019-08-24T14:15:22Z",
+      "is_verified": true,
+      "profile_picture": "http://example.com"
     },
     "tokens": {
       "access": "xxx",
@@ -114,7 +121,7 @@
 
 ```json
 {
-  "refresh": "xxx"
+  "refresh": "string"
 }
 ```
 
@@ -127,7 +134,7 @@
   "errorCode": "",
   "errors": null,
   "result": {
-    "access": "xxx"
+    "access": "string"
   },
   "hasResult": true
 }
@@ -142,7 +149,7 @@
 
 ```json
 {
-  "refresh": "xxx"
+  "refresh": "string"
 }
 ```
 
@@ -168,9 +175,9 @@
 
 ```json
 {
-  "new_password": "xxx",
-  "again_new_password": "xxx",
-  "old_password": "xxxx"
+  "old_password": "string",
+  "new_password": "string",
+  "again_new_password": "string"
 }
 ```
 
@@ -196,11 +203,11 @@
 
 ```json
 {
-  "first_name": "xxx",
-  "last_name": "xxx",
-  "user_name": "xxx",
-  "address": "xxx",
-  "bio": "xxx"
+  "first_name": "string",
+  "last_name": "string",
+  "user_name": "string",
+  "address": "string",
+  "bio": "string"
 }
 ```
 
@@ -213,17 +220,47 @@
   "errorCode": "",
   "errors": null,
   "result": {
-    "username": "sohaibfazal68",
-    "email": "bcsf19m010@pucit.edu.pk",
-    "phone_number": "03334461447",
-    "address": "Lahore",
-    "date_of_birth": "2001-10-25",
-    "gender": 1,
-    "bio": "SQA Engineer @ Bigentities",
-    "first_name": "Sohaib",
-    "last_name": "Fazal",
-    "date_joined": "2024-08-29T21:24:19.457513Z",
-    "is_verified": true
+    "username": "string",
+    "email": "user@example.com",
+    "password": "string",
+    "phone_number": "strings",
+    "address": "string",
+    "date_of_birth": "2019-08-24",
+    "gender": 0,
+    "bio": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "date_joined": "2019-08-24T14:15:22Z",
+    "is_verified": true,
+    "profile_picture": "http://example.com"
+  },
+  "hasResult": true
+}
+```
+
+### 8. User Name Availablility
+
+**Endpoint:** `api/is-username-available/`
+**Method:** POST
+
+**Request:**
+
+```json
+{
+  "username": "string"
+}
+```
+
+**Response:**
+
+```json
+{
+  "status": true,
+  "message": "Username availability check completed.",
+  "errorCode": "",
+  "errors": null,
+  "result": {
+      "user_name_availbility": true
   },
   "hasResult": true
 }

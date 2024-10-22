@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 import uuid
 from django.conf import settings
+from django.core.validators import RegexValidator
 
 from common.models.base_model import BaseModel
 from common.models.models import Gender
@@ -26,7 +27,18 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin, BaseModel):
-    username = models.CharField(max_length=150, unique=True, blank=False, null=False)
+    username_validator = RegexValidator(
+        regex=r'^[a-zA-Z0-9.]+$',
+        message="Username must contain only letters, numbers, and dots (.)"
+    )
+    
+    username = models.CharField(
+        max_length=150, 
+        unique=True, 
+        blank=False, 
+        null=False,
+        validators=[username_validator]  # Add the validator here
+    )
     email = models.EmailField(unique=True, blank=False, null=False)
     first_name = models.CharField(max_length=30, blank=False, null=False)
     last_name = models.CharField(max_length=30, blank=True)

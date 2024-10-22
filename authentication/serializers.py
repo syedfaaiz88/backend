@@ -1,9 +1,12 @@
 from rest_framework import serializers
-
+from django.core.validators import RegexValidator
 from services.user_service import UserService
 from utils.validate_password import validate_password_strength
 from .models import User
 from django.utils import timezone
+
+class DummySerializer(serializers.Serializer):
+    pass
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -59,3 +62,16 @@ class EditProfileDetailsSerializer(serializers.Serializer):
 
 class EditProfilePictureSerializer(serializers.Serializer):
     profile_picture = serializers.ImageField()
+
+class UserNameAvailablilitySerializer(serializers.Serializer):
+    username_validator = RegexValidator(
+        regex=r'^[a-zA-Z0-9.]+$',
+        message="Username must contain only letters, numbers, and dots (.)"
+    )
+    username = serializers.CharField(min_length=5,validators=[username_validator])
+
+    def validate_username(self, value):
+        # Check if the username starts or ends with a dot
+        if value.startswith('.') or value.endswith('.'):
+            raise serializers.ValidationError("Contains misplaced special characters")
+        return value
